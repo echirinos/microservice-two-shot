@@ -1,14 +1,17 @@
 from django.db import models
 
-class ShoesVO(models.Model):
+class BinVO(models.Model):
     import_href = models.CharField(max_length=200, unique=True)
     name = models.CharField(max_length=200)
 
-class Shoes(models.Model):
-    name = models.CharField(max_length=200)
-    manufacturer = models.CharField(max_length=200)
-    color = models.CharField(max_length=50)
-    picture_url = models.URLField(null = True)
 
-    def __str__(self):
-        return self.name
+class Shoes(models.Model):
+    manufacturer = models.CharField(max_length=150)
+    model_name = models.CharField(max_length=150)
+    color = models.CharField(max_length=150)
+    url = models.URLField(max_length=300)
+    bin = models.ForeignKey(
+        BinVO,
+        related_name="shoe",
+        on_delete=models.CASCADE
+    )
