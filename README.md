@@ -2,8 +2,8 @@
 
 Team:
 
-* Tanner - Hats
-* Esteban - Shoes
+* Tanner Halsey - Hats
+* Esteban Chirinos - Shoes
 
 ## Design
 
