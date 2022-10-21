@@ -7,6 +7,7 @@ class Location(models.Model):
     section_number = models.PositiveSmallIntegerField()
     shelf_number = models.PositiveSmallIntegerField()
 
+
     def get_api_url(self):
         return reverse("api_location", kwargs={"pk": self.pk})
 

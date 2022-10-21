@@ -1,5 +1,6 @@
 from django.contrib import admin
 
-from .models import Shoes
+from .models import Shoe, BinVO
 
-admin.site.register(Shoes)
+admin.site.register(Shoe)
+admin.site.register(BinVO)

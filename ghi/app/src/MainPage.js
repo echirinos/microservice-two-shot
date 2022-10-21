@@ -7,6 +7,7 @@ function MainPage() {
           Need to keep track of your shoes and hats? We have
           the solution for you!
         </p>
+        <p>Check out the Nav bar for some sweet options!</p>
       </div>
     </div>
   );

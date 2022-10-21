@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    "shoes_rest.apps.ShoesApiConfig",
+    "shoes_rest",
 ]
 
 MIDDLEWARE = [
