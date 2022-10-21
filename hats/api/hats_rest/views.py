@@ -1,32 +1,103 @@
 from django.shortcuts import render
-from .models import Hat
-# Create your views here.
-from common.json import ModelEncoder
 from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
 import json
+from .models import LocationVO, Hat
+from common.json import ModelEncoder
 
-class LocationListEncoder(ModelEncoder):
+
+# Create your views here.
+
+class LocationVOEncoder(ModelEncoder):
+    model = LocationVO
+    properties = ["id", "closet_name", "section_number", "shelf_number"]
+
+class HatEncoder(ModelEncoder):
     model = Hat
-    properties = ["fabric", "picture_url", "style_name", "wardrobe_location"]
+    properties = ["id", "fabric", "style_name", "color", "picture_url", "location"]
+    encoders = {
+        "location": LocationVOEncoder()
+    }
 
-def api_list_locations(request):
-    # Get the states from the database ordered by name
-    hats = Hat.objects.order_by('name')
 
-    # Create an empty list named state_list
-    hat_list = []
+def list_location_vos(request):
+    location = LocationVO.objects.all()
+    return JsonResponse(
+    {"locations": location},
+    encoder=LocationVOEncoder,
+)
 
-    # For each state in the states from the database
-    for hat in hats:
-        # Create a dictionary that contains the name and
-        # abbreviation for each state
-        hat_dict = {}
-        hat_dict["fabric"] = hat.fabric
-        hat_dict["style_name"] = hat.style_name
-        hat_dict["color"] = hat.color
-        hat_dict["wardrobe_location"]= hat.wardrobe_location
 
-        # Append the dictionary to the list
-        hat_list.append(hat_dict)
+@require_http_methods(["GET", "POST"])
+def list_hats(request):
+    """
+    Collection RESTful API handler for Hat objects in
+    the wardrobe.
+    """
+    if request.method == "GET":
+        hats = Hat.objects.all()
+        return JsonResponse (
+            {"hats": hats},
+            encoder=HatEncoder,
+            safe=False,
+            )
+    if request.method == "POST":
+        content = json.loads(request.body)
+        try:
+            if "location" in content:
+                location_id = content["location"]
+                location = LocationVO.objects.get(id=location_id)
+                content["location"] = location
+            else:
+                content["location"] = None
+        except LocationVO.DoesNotExist:
+            return JsonResponse(
+                {"Message": "Invalid location"},
+                status=400,
+            )
+        hat = Hat.objects.create(**content)
+        return JsonResponse(
+            hat,
+            encoder=HatEncoder,
+            safe=False,
+        )
 
-    return JsonResponse({"hats": hat_list})
+
+@require_http_methods(["GET", "PUT", "DELETE"])
+def show_hats(request, pk):
+    """
+    Item RESTful API handler for Hat objects in
+    the wardrobe.
+    """
+    if request.method == "GET":
+        hat = Hat.objects.get(id=pk)
+        return JsonResponse(
+            hat,
+            encoder=HatEncoder,
+            safe=False,
+        )
+    if request.method == "PUT":
+        content = json.loads(request.body)
+        try:
+            if "location" in content:
+                location_id = content["location"]
+                location = LocationVO.objects.get(id=location_id)
+                content["location"] = location
+        except LocationVO.DoesNotExist:
+            return JsonResponse(
+                {"Message": "Invalid location"},
+                status=400,
+            )
+        Hat.objects.filter(id=pk).update(**content)
+        hat = Hat.objects.get(id=pk)
+        return JsonResponse(
+            hat,
+            encoder=HatEncoder,
+            safe=False,
+        )
+    if request.method == "DELETE":
+        count, _ = Hat.objects.filter(id=pk).delete()
+        return JsonResponse(
+            {"Deleted": count > 0},
+            status=204,
+        )

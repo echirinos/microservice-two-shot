@@ -12,12 +12,25 @@ django.setup()
 # Import models from hats_rest, here.
 # from hats_rest.models import Something
 
+from hats_rest.models import LocationVO
+
+def get_locations():
+    url = "http://wardrobe-api:8000/api/locations/"
+    response = requests.get(url)
+    content = json.loads(response.content)
+    for location in content["locations"]:
+        LocationVO.objects.update_or_create(
+            id=location["id"],
+            closet_name=location["closet_name"],
+            section_number=location["section_number"],
+            shelf_number=location["shelf_number"],
+        )
+
 def poll():
     while True:
-        print('Hats poller polling for data')
+        print('Hat poller polling for data')
         try:
-            # Write your polling logic, here
-            pass
+            get_locations()
         except Exception as e:
             print(e, file=sys.stderr)
         time.sleep(60)
@@ -25,3 +38,4 @@ def poll():
 
 if __name__ == "__main__":
     poll()
+
